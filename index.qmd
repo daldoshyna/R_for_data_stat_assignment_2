@@ -1,0 +1,191 @@
+---
+title: "Assignment 02: Data Wrangling & Tidying with Tidyverse"
+author: "Diana Aldoshyna"
+format: html
+---
+
+```{r}
+#| label: setup
+#| include: false
+#| cache: false
+library(tidyverse)
+library(gt)
+```
+
+<br>
+
+## Import and Explore the Data
+For this assignment I chose a **dataset about income inequality** (income_inequality_processed.csv).
+
+```{r}
+#| label: Import the Data
+#| echo: true
+#| message: false
+#| cache: false
+
+income_inequality <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-08-05/income_inequality_processed.csv')
+```
+
+Basic information about the columns of the dataset:
+
+![](image.png)
+
+<br>
+
+```{r}
+#| label: Explore the Data
+#| include: true
+#| cache: false
+
+glimpse(income_inequality)
+
+income_inequality |> 
+  head(10) |> 
+  gt()
+
+summary(income_inequality)
+```
+
+<br>
+
+## Filtering & Selecting
+Here I filtered out the observations that had been made earlier than in 2000, and those ones that had NA in gini_mi_eq column (it's the only column with NA, as can be seen in summary()).
+
+Also I selected the four columns I'd be working with:
+
+```{r}
+#| label: Filter and Select the Data
+#| include: true
+#| cache: false
+
+income_inequality <- income_inequality |> 
+  filter (Year >= 2000, !is.na(gini_mi_eq)) |> 
+  select (c("Entity", "Year", "gini_mi_eq", "gini_dhi_eq")) 
+
+income_inequality |> 
+  head(10) |> 
+  gt()
+
+```
+
+<br>
+
+Five observations with the highest Gini index "post-tax" (higher values indicate higher inequality):
+
+```{r}
+#| label: Top five "post-tax"
+#| include: true
+#| cache: false
+
+income_inequality |> 
+  slice_max(gini_dhi_eq, n = 5) |> 
+  gt()
+```
+
+It's not very informative right now, so we will return to it after we group data by country :)
+
+<br>
+
+## Mutating Variables
+I decided to created a column that would be the difference between Gini indexes "pre-tax" and "post-tax". This would allow us to see the difference that the tax policy of the country was making in relation to the inequality of income.
+
+```{r}
+#| label: Mutating variables
+#| include: true
+#| cache: false
+
+income_inequality <- income_inequality |> 
+  mutate(gini_diff = gini_mi_eq - gini_dhi_eq)
+```
+
+The observation with the biggest difference between Gini indexes "pre-tax" and "post-tax":
+
+```{r}
+#| label: Top taxes
+#| include: true
+#| cache: false
+
+income_inequality |> 
+  slice_max(gini_diff, n = 1) |> 
+  gt()
+```
+
+<br>
+
+## Grouping & Summarizing
+Firstly, I grouped data by country:
+
+```{r}
+#| label: Grouping & Summarizing by country
+#| include: true
+#| cache: false
+
+grouped_by_country <- income_inequality |> 
+  group_by(Entity) |> 
+  summarize(
+    num_observations = length(gini_dhi_eq),
+    avg_gini = mean(gini_dhi_eq),
+    md_gini = median(gini_dhi_eq),
+    most_recent_gini = gini_dhi_eq[which.max(Year)],
+    category = case_when(
+      most_recent_gini < 0.25 ~ "<0.25",
+      (0.25 <= most_recent_gini) & (most_recent_gini < 0.3) ~ "<0.3",
+      (0.3 <= most_recent_gini) & (most_recent_gini < 0.35) ~ "<0.35",
+      (0.35 <= most_recent_gini) & (most_recent_gini < 0.5) ~ "<0.5",
+      most_recent_gini >= 0.5 ~ ">0.5"
+      )) |> 
+  ungroup()
+```
+
+The last time we looked at the five observations with the highest Gini index "post-tax", it wasn't very informative as all of those observations had been made in South Africa, just in different years. 
+
+Now, however, we can easily see the five *countries* with the highest Gini index "post-tax" (ordered by the most recent indexes):
+
+```{r}
+#| label: Descending by the most recent Gini index
+#| include: true
+#| cache: false
+
+grouped_by_country |> 
+  arrange(desc(most_recent_gini)) |> 
+  head(5) |> 
+  gt()
+```
+
+And also five countries with the lowest Gini index "post-tax" (ordered by the most recent indexes):
+
+```{r}
+#| label: Ascending by the most recent Gini index
+#| include: true
+#| cache: false
+
+grouped_by_country |> 
+  arrange(most_recent_gini) |> 
+  head(5) |> 
+  gt()
+```
+
+<br>
+
+Secondly, I also grouped it by the new "category" column, to see which countries have similar Gini indexes:
+
+```{r}
+#| label: Grouping and Summarising by category
+#| include: true
+#| cache: false
+
+grouped_by_inequality_category <- grouped_by_country |>
+  group_by(category) |> 
+  summarise(
+    count = length(Entity),
+    countries = paste(Entity, collapse = ", ")
+    ) |> 
+  ungroup()
+
+grouped_by_inequality_category |> 
+  gt()
+```
+
+<br>
+
+That's all, thanks :)
