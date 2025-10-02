@@ -1,0 +1,129 @@
+---
+title: "Assignment 04: Data Visualization — ggplot2 and Beyond"
+author: "Diana Aldoshyna"
+format: html
+---
+
+```{r}
+#| label: setup
+#| include: false
+#| cache: false
+library(tidyverse)
+library(gt)
+library(plotly)
+library(RColorBrewer)
+```
+
+
+For this assignment I chose to continue working on the **dataset about income inequality** (income_inequality_processed.csv), and take a closer look at the **countries of G7** (without France, because, unfortunately, it's not in the dataset).
+
+```{r}
+#| label: Import the Data
+#| echo: true
+#| message: false
+#| cache: false
+
+income_inequality <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-08-05/income_inequality_processed.csv')
+```
+
+Basic information about the columns of the dataset:
+
+![](image.png)
+
+```{r}
+#| label: Explore the Data
+#| include: true
+#| cache: false
+
+income_inequality |> 
+  head(10) |> 
+  gt()
+```
+
+<br>
+
+### Chronological tendecies
+Firstly, let's take a look at how Index Gini "post-tax" changed in the countries of G7 throughout the years:
+
+
+```{r}
+#| label: Chronological tendecies
+#| include: true
+#| cache: false
+
+# cleaning data
+countries_G7 <- c("Germany", "Japan", "Canada", "France", "Italy", "United Kingdom", "United States")
+
+income_inequality <- income_inequality |> 
+  filter(!is.na(gini_mi_eq),
+         Entity %in% countries_G7,
+         (Year >= 2010) & (Year <= 2020)) |> 
+  mutate(Year_date = as.Date(paste0(Year, "-01-01")),
+         gini_diff = gini_mi_eq - gini_dhi_eq)
+
+fig <- income_inequality |> 
+  ggplot(aes(
+    x = Year_date, 
+    y = gini_dhi_eq, 
+    color = Entity)) +
+  geom_line(alpha = 0.7) +
+  geom_point() +
+  labs(x = "Year",
+       y = "Index Gini 'post-tax'",
+       title = "Changes of Index Gini 'post-tax' in the countries of G7 throughout the years") +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  theme_light()
+
+ggplotly(data = fig)
+```
+
+<br>
+
+### Relation between Gini Index 'pre-tax' and 'post-tax' 
+Secondly, let's take a look at how Indexes Gini 'pre-tax' and 'post-tax' are related to each other in the countries of G7:
+
+
+```{r}
+#| label: Relation between Gini Index 'pre-tax' and 'post-tax' 
+#| include: true
+#| cache: false
+
+
+fig <- income_inequality |> 
+  ggplot( aes(x = gini_mi_eq, y = gini_dhi_eq, color = Entity)) +
+    geom_point(alpha = 0.8) +
+    labs(x = "Gini 'pre-tax'", y = "Gini 'post-tax'")
+
+ggplotly(data = fig)
+```
+We can see that the data about the countries is located in quite distinct clusters.
+
+<br>
+
+### Difference between Gini Index 'pre-tax' and 'post-tax'
+Thirdly, let's look at the difference between Gini Index 'pre-tax' and 'post-tax' in the countries of G7. It shows how much redistribution (taxes, social benefits) reduces inequality.
+
+```{r}
+#| label: Difference between Gini Index
+#| include: true
+#| cache: false
+
+income_inequality |> 
+   filter(Year == 2020) |> 
+  
+  ggplot(aes(
+    x = as.factor(Entity), 
+    y = gini_diff,
+    fill = Entity            
+  )) +
+  geom_col() +
+  geom_text(aes(label = gini_diff), 
+            vjust = -0.3,
+            size = 3.5) +
+  theme_minimal() +
+  labs(x = "Country",
+       y = "The difference",
+       title = "Difference between Gini Index 'pre-tax' and 'post-tax' in 2020")
+
+```
+
