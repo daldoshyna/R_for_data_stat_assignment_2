@@ -12,10 +12,12 @@ library(tidyverse)
 library(gt)
 library(plotly)
 library(RColorBrewer)
+library(rnaturalearth)
+library(rnaturalearthdata)
 ```
 
 
-For this assignment I chose to continue working on the **dataset about income inequality** (income_inequality_processed.csv), and take a closer look at the **countries of G7** (without France, because, unfortunately, it's not in the dataset).
+For this assignment I chose to continue working on the **dataset about income inequality** (income_inequality_processed.csv).
 
 ```{r}
 #| label: Import the Data
@@ -42,6 +44,42 @@ income_inequality |>
 
 <br>
 
+At the beginning, I wanted to take a look at the general picture and show the latest readings of the Gini Indexes 'post-tax' of all of countries on a map.
+
+```{r}
+#| label: Map
+#| include: true
+#| cache: false
+#| column: screen-inset
+
+income_inequality_recent <- income_inequality |> 
+  group_by(Entity) |> 
+  summarize(most_recent_gini = gini_dhi_eq[which.max(Year)]) |> 
+  ungroup() |> 
+  mutate(country_name = case_when(
+    Entity == "United States" ~ "United States of America",
+    Entity == "Dominican Republic" ~ "Dominican Rep.",
+    Entity == "Cote d'Ivoire" ~ "Côte d'Ivoire",
+    .default = Entity))
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+world_data <- world %>%
+  left_join(income_inequality_recent, by = c("name" = "country_name"))
+
+fig <- ggplot(world_data) +
+  geom_sf(aes(fill = most_recent_gini)) +
+  scale_fill_viridis_c(option = "plasma", na.value = "grey90") +
+  theme_minimal() +
+  labs(fill = "Index Gini 'post-tax'", title = "The latest readings of the 'post-tax' Gini Index")
+
+ggplotly(data = fig)
+```
+
+<br>
+
+Next, I decided to take a closer look at the **countries of G7** and the redings of the Gini Indexes there.
+
 ### Chronological tendecies
 Firstly, let's take a look at how Index Gini "post-tax" changed in the countries of G7 throughout the years:
 
@@ -50,6 +88,7 @@ Firstly, let's take a look at how Index Gini "post-tax" changed in the countries
 #| label: Chronological tendecies
 #| include: true
 #| cache: false
+#| column: body-outset
 
 # cleaning data
 countries_G7 <- c("Germany", "Japan", "Canada", "France", "Italy", "United Kingdom", "United States")
@@ -92,7 +131,7 @@ Secondly, let's take a look at how Indexes Gini 'pre-tax' and 'post-tax' are rel
 fig <- income_inequality |> 
   ggplot( aes(x = gini_mi_eq, y = gini_dhi_eq, color = Entity)) +
     geom_point(alpha = 0.8) +
-    labs(x = "Gini 'pre-tax'", y = "Gini 'post-tax'")
+    labs(x = "Index Gini 'pre-tax'", y = "Index Gini 'post-tax'")
 
 ggplotly(data = fig)
 ```
@@ -123,7 +162,10 @@ income_inequality |>
   theme_minimal() +
   labs(x = "Country",
        y = "The difference",
-       title = "Difference between Gini Index 'pre-tax' and 'post-tax' in 2020")
+       title = "Difference between Index Gini 'pre-tax' and 'post-tax' in 2020")
 
 ```
+
+
+
 
