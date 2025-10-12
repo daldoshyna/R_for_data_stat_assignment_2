@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Diana Aldoshyna">
+
+<title>Assignment 05: Web scraping and APIs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="assignment_5_files/libs/clipboard/clipboard.min.js"></script>
+<script src="assignment_5_files/libs/quarto-html/quarto.js"></script>
+<script src="assignment_5_files/libs/quarto-html/popper.min.js"></script>
+<script src="assignment_5_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="assignment_5_files/libs/quarto-html/anchor.min.js"></script>
+<link href="assignment_5_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="assignment_5_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="assignment_5_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="assignment_5_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="assignment_5_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="assignment_5_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="assignment_5_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="assignment_5_files/libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="assignment_5_files/libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="assignment_5_files/libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="assignment_5_files/libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="assignment_5_files/libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="assignment_5_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="assignment_5_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Assignment 05: Web scraping and APIs</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Diana Aldoshyna </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><br></p>
+<section id="task-1.-basic" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="task-1.-basic">Task 1. Basic</h2>
+<p>For the first task I chose to work with a dataset from Wikipedia about <strong>helicopter prison escapes</strong> (simply because it sounded intriguing:)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">"https://en.wikipedia.org/wiki/List_of_helicopter_prison_escapes"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>page <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>page</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{html_document}
+&lt;html class="client-nojs vector-feature-language-in-header-enabled vector-feature-language-in-main-page-header-disabled vector-feature-page-tools-pinned-disabled vector-feature-toc-pinned-clientpref-1 vector-feature-main-menu-pinned-disabled vector-feature-limited-width-clientpref-1 vector-feature-limited-width-content-enabled vector-feature-custom-font-size-clientpref-1 vector-feature-appearance-pinned-clientpref-1 vector-feature-night-mode-enabled skin-theme-clientpref-day vector-sticky-header-enabled vector-toc-available" lang="en" dir="ltr"&gt;
+[1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8 ...
+[2] &lt;body class="skin--responsive skin-vector skin-vector-search-vue mediawik ...</code></pre>
+</div>
+</div>
+<p><br></p>
+<section id="scraping-the-data-and-also-cleaning-it" class="level4">
+<h4 class="anchored" data-anchor-id="scraping-the-data-and-also-cleaning-it">Scraping the data and also cleaning it</h4>
+<div class="line-block">&nbsp;- changing the “date” column from char type into data type<br>
+&nbsp;- getting rid of the “details” column because it’s not necessary for the analysis and also has <em>a lot</em> of text in it</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>prison_breaks <span class="ot">&lt;-</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  page <span class="sc">|&gt;</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_element</span>(<span class="st">"#mw-content-text &gt; div.mw-content-ltr.mw-parser-output &gt; table:nth-child(14)"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_table</span>()<span class="sc">|&gt;</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>()<span class="sc">|&gt;</span>         </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date =</span> <span class="fu">mdy</span>(date)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">!</span>details)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>prison_breaks</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 50 × 5
+   date       prison_name                            country succeeded escapee_s
+   &lt;date&gt;     &lt;chr&gt;                                  &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;    
+ 1 1971-08-19 Santa Martha Acatitla                  Mexico  Yes       "Joel Da…
+ 2 1973-10-31 Mountjoy Jail, Dublin                  Ireland Yes       "JB O'Ha…
+ 3 1978-05-24 United States Penitentiary, Marion, I… United… No        "Garrett…
+ 4 1981-02-27 Fleury-Mérogis, Essonne, Ile de France France  Yes       "Gérard …
+ 5 1981-05-07 Orsainville Prison, Quebec City        Canada  No        "Marina …
+ 6 1983-01-19 Pentridge (HM Prison)                  Austra… No        "David M…
+ 7 1985-12-19 Perry Correctional Institution, Pelze… United… Yes       "James R…
+ 8 1985-12-31 Cândido Mendes penitentiary, Ilha Gra… Brazil  Yes       "José Ca…
+ 9 1986-05-26 Prison de la Santé                     France  Yes       "Michel …
+10 1986-11-05 Federal Correctional Institution, Dub… United… Yes       "Samanth…
+# ℹ 40 more rows</code></pre>
+</div>
+</div>
+<p><br></p>
+</section>
+<section id="visulisations" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="visulisations">Visulisations</h4>
+<p>I made two visualizations: one to show chronological tendencies, and another one to show the number of escapes per country.</p>
+<div class="cell page-columns page-full">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig <span class="ot">&lt;-</span> prison_breaks <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> <span class="fu">year</span>(date),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">year_cat =</span> <span class="fu">case_when</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">1970</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">1975</span>) <span class="sc">~</span> <span class="st">"1970-1975"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">1975</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">1980</span>) <span class="sc">~</span> <span class="st">"1975-1980"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">1980</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">1985</span>) <span class="sc">~</span> <span class="st">"1980-1985"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">1985</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">1990</span>) <span class="sc">~</span> <span class="st">"1985-1990"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">1990</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">1995</span>) <span class="sc">~</span> <span class="st">"1990-1995"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">1995</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">2000</span>) <span class="sc">~</span> <span class="st">"1995-2000"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">2000</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">2005</span>) <span class="sc">~</span> <span class="st">"2000-2005"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">2005</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">2010</span>) <span class="sc">~</span> <span class="st">"2005-2010"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">2010</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;</span> <span class="dv">2015</span>) <span class="sc">~</span> <span class="st">"2010-2015"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>           (year <span class="sc">&gt;=</span> <span class="dv">2015</span>) <span class="sc">&amp;</span> (year <span class="sc">&lt;=</span> <span class="dv">2020</span>) <span class="sc">~</span> <span class="st">"2015-2020"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>           <span class="at">.default =</span> <span class="st">"?"</span>),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">year_cat =</span> <span class="fu">factor</span>(year_cat, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"1970-1975"</span>, <span class="st">"1975-1980"</span>, <span class="st">"1980-1985"</span>, <span class="st">"1985-1990"</span>, <span class="st">"1990-1995"</span>, <span class="st">"1995-2000"</span>, <span class="st">"2000-2005"</span>, <span class="st">"2005-2010"</span>, <span class="st">"2010-2015"</span>, <span class="st">"2015-2020"</span>)))<span class="sc">|&gt;</span> </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year_cat) <span class="sc">|&gt;</span>            </span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">count =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> year_cat, </span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> count,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"blue4"</span>, <span class="at">size =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"blue4"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Total number"</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Number of helicopter prison escapes per five-year period"</span>) <span class="sc">+</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>()</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(<span class="at">data =</span> fig)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-screen-inset">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-e87de84e074c83ac0147" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-e87de84e074c83ac0147">{"x":{"data":[{"x":[1,2,3,4,5,6,7,8,9,10],"y":[2,1,3,11,5,3,8,9,5,3],"text":["year_cat: 1970-1975<br />count:  2","year_cat: 1975-1980<br />count:  1","year_cat: 1980-1985<br />count:  3","year_cat: 1985-1990<br />count: 11","year_cat: 1990-1995<br />count:  5","year_cat: 1995-2000<br />count:  3","year_cat: 2000-2005<br />count:  8","year_cat: 2005-2010<br />count:  9","year_cat: 2010-2015<br />count:  5","year_cat: 2015-2020<br />count:  3"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,0,139,1)","opacity":1,"size":9.4488188976377963,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,139,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":5.6692913385826778,"color":"rgba(0,0,139,0.4)","dash":"solid"},"frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":31.415525114155255},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Number of helicopter prison escapes per five-year period","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["1970-1975","1975-1980","1980-1985","1985-1990","1990-1995","1995-2000","2000-2005","2005-2010","2010-2015","2015-2020"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["1970-1975","1975-1980","1980-1985","1985-1990","1990-1995","1995-2000","2000-2005","2005-2010","2010-2015","2015-2020"],"nticks":null,"ticks":"outside","tickcolor":"rgba(179,179,179,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(222,222,222,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"Year","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.5,11.5],"tickmode":"array","ticktext":["3","6","9"],"tickvals":[3,6,9],"categoryorder":"array","categoryarray":["3","6","9"],"nticks":null,"ticks":"outside","tickcolor":"rgba(179,179,179,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(222,222,222,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"Total number","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"rgba(255,255,255,1)","line":{"color":"rgba(179,179,179,1)","width":0,"linetype":"solid"},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"640714421056":{"x":{},"y":{},"type":"scatter"},"64077d3e887d":{"x":{},"y":{}}},"cur_data":"640714421056","visdat":{"640714421056":["function (y) ","x"],"64077d3e887d":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p><br></p>
+<div class="cell page-columns page-full">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig <span class="ot">&lt;-</span> prison_breaks <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="fu">fct_infreq</span>(country))) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill =</span> succeeded)) <span class="sc">+</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Yes"</span> <span class="ot">=</span> <span class="st">"steelblue"</span>, <span class="st">"No"</span> <span class="ot">=</span> <span class="st">"tomato"</span>)) <span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Country"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Number of break-outs"</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Number of helicopter prison escapes per country"</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Was it successful?"</span>) <span class="sc">+</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>()</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(<span class="at">data =</span> fig)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-screen-inset">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-0e7659323ab02675458b" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-0e7659323ab02675458b">{"x":{"data":[{"orientation":"v","width":[0.89999999999999991,0.90000000000000013,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.89999999999999858,0.89999999999999858],"base":[11,6,2,3,2,1,1,0],"x":[1,2,3,4,5,6,9,14],"y":[4,2,2,1,2,1,1,1],"text":["count:  4<br />fct_infreq(country): France<br />succeeded: No","count:  2<br />fct_infreq(country): United States<br />succeeded: No","count:  2<br />fct_infreq(country): Belgium<br />succeeded: No","count:  1<br />fct_infreq(country): Canada<br />succeeded: No","count:  2<br />fct_infreq(country): Greece<br />succeeded: No","count:  1<br />fct_infreq(country): Australia<br />succeeded: No","count:  1<br />fct_infreq(country): United Kingdom<br />succeeded: No","count:  1<br />fct_infreq(country): Netherlands<br />succeeded: No"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(255,99,71,1)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"No","legendgroup":"No","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"v","width":[0.89999999999999991,0.90000000000000013,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.89999999999999947,0.89999999999999858,0.89999999999999858,0.89999999999999858,0.89999999999999858,0.89999999999999858,0.89999999999999858,0.89999999999999858],"base":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,15,16],"y":[11,6,2,3,2,1,2,2,1,1,1,1,1,1,1],"text":["count: 11<br />fct_infreq(country): France<br />succeeded: Yes","count:  6<br />fct_infreq(country): United States<br />succeeded: Yes","count:  2<br />fct_infreq(country): Belgium<br />succeeded: Yes","count:  3<br />fct_infreq(country): Canada<br />succeeded: Yes","count:  2<br />fct_infreq(country): Greece<br />succeeded: Yes","count:  1<br />fct_infreq(country): Australia<br />succeeded: Yes","count:  2<br />fct_infreq(country): Brazil<br />succeeded: Yes","count:  2<br />fct_infreq(country): Colombia<br />succeeded: Yes","count:  1<br />fct_infreq(country): United Kingdom<br />succeeded: Yes","count:  1<br />fct_infreq(country): Chile<br />succeeded: Yes","count:  1<br />fct_infreq(country): Ireland<br />succeeded: Yes","count:  1<br />fct_infreq(country): Italy<br />succeeded: Yes","count:  1<br />fct_infreq(country): Mexico<br />succeeded: Yes","count:  1<br />fct_infreq(country): Puerto Rico<br />succeeded: Yes","count:  1<br />fct_infreq(country): Russia<br />succeeded: Yes"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(70,130,180,1)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Yes","legendgroup":"Yes","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":37.260273972602747},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Number of helicopter prison escapes per country","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,16.600000000000001],"tickmode":"array","ticktext":["France","United States","Belgium","Canada","Greece","Australia","Brazil","Colombia","United Kingdom","Chile","Ireland","Italy","Mexico","Netherlands","Puerto Rico","Russia"],"tickvals":[1,2,3.0000000000000004,4,5,6,7,8,9,10,11,12,13,14,15,16],"categoryorder":"array","categoryarray":["France","United States","Belgium","Canada","Greece","Australia","Brazil","Colombia","United Kingdom","Chile","Ireland","Italy","Mexico","Netherlands","Puerto Rico","Russia"],"nticks":null,"ticks":"outside","tickcolor":"rgba(179,179,179,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(222,222,222,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"Country","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.75,15.75],"tickmode":"array","ticktext":["0","5","10","15"],"tickvals":[0,5,10,15],"categoryorder":"array","categoryarray":["0","5","10","15"],"nticks":null,"ticks":"outside","tickcolor":"rgba(179,179,179,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(222,222,222,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"Number of break-outs","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"rgba(255,255,255,1)","line":{"color":"rgba(179,179,179,1)","width":0,"linetype":"solid"},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"Was it successful?","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"640763f9887b":{"x":{},"fill":{},"type":"bar"}},"cur_data":"640763f9887b","visdat":{"640763f9887b":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p><br></p>
+</section>
+</section>
+<section id="task-2.-advanced" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="task-2.-advanced">Task 2. Advanced</h2>
+<p>For the second task I chose to work with a dataset from NASA about <strong>weather on Mars</strong>. The dataset has information about the <em>last seven days (sols)</em>, including information about:</p>
+<div class="line-block">&nbsp;- temperature (“AT”),<br>
+&nbsp;- atmospheric pressure (“PRE”),<br>
+&nbsp;- horizontal wind speed (“HWS”),<br>
+&nbsp;- wind direction (“WD”)</div>
+<section id="making-a-request-creating-a-dataframe" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="making-a-request-creating-a-dataframe">Making a request, creating a dataframe</h4>
+<div class="cell page-columns page-full">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>req <span class="ot">&lt;-</span> <span class="fu">request</span>(<span class="st">"https://api.nasa.gov/insight_weather/"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> req <span class="sc">%&gt;%</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">api_key =</span> <span class="fu">Sys.getenv</span>(<span class="st">"NASA_API_KEY"</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">feedtype =</span> <span class="st">"json"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ver =</span> <span class="fl">1.0</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>mars_json <span class="ot">&lt;-</span> resp <span class="sc">%&gt;%</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">resp_body_json</span>() </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co"># the json here is nested and irregular, so I collected the data sol by sol</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>sols <span class="ot">&lt;-</span> mars_json<span class="sc">$</span>sol_keys</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>mars_data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(sols, <span class="cf">function</span>(sol) {</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  sol_data <span class="ot">&lt;-</span> mars_json[[sol]]</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">sol =</span> sol,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">AT_av =</span> sol_data<span class="sc">$</span>AT<span class="sc">$</span>av,</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">AT_mn =</span> sol_data<span class="sc">$</span>AT<span class="sc">$</span>mn,</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">AT_mx =</span> sol_data<span class="sc">$</span>AT<span class="sc">$</span>mx,</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">PRE_av =</span> sol_data<span class="sc">$</span>PRE<span class="sc">$</span>av,</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">PRE_mn =</span> sol_data<span class="sc">$</span>PRE<span class="sc">$</span>mn,</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">PRE_mx =</span> sol_data<span class="sc">$</span>PRE<span class="sc">$</span>mx,</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">HWS_av =</span> sol_data<span class="sc">$</span>HWS<span class="sc">$</span>av,</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">HWS_mn =</span> sol_data<span class="sc">$</span>HWS<span class="sc">$</span>mn,</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">HWS_mx =</span> sol_data<span class="sc">$</span>HWS<span class="sc">$</span>mx,</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">WD_compass_degrees =</span> sol_data<span class="sc">$</span>WD<span class="sc">$</span>most_common<span class="sc">$</span>compass_degrees,</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">Season =</span> sol_data<span class="sc">$</span>Season,</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">Month_ordinal =</span> sol_data<span class="sc">$</span>Month_ordinal</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="co"># the temperature here is in Fahrenheits, so I changed it into Celsius</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>mars_data <span class="ot">&lt;-</span> mars_data <span class="sc">|&gt;</span> </span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AT_av =</span> (AT_av <span class="sc">-</span> <span class="dv">32</span>) <span class="sc">/</span> <span class="fl">1.8</span>,</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>         <span class="at">AT_mn =</span> (AT_mn <span class="sc">-</span> <span class="dv">32</span>) <span class="sc">/</span> <span class="fl">1.8</span>,</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>         <span class="at">AT_mx =</span> (AT_mx <span class="sc">-</span> <span class="dv">32</span>) <span class="sc">/</span> <span class="fl">1.8</span>) </span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>mars_data <span class="sc">|&gt;</span> <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-screen-inset">
+<div id="ofvgocytdn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ofvgocytdn table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#ofvgocytdn thead, #ofvgocytdn tbody, #ofvgocytdn tfoot, #ofvgocytdn tr, #ofvgocytdn td, #ofvgocytdn th {
+  border-style: none;
+}
+
+#ofvgocytdn p {
+  margin: 0;
+  padding: 0;
+}
+
+#ofvgocytdn .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#ofvgocytdn .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ofvgocytdn .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ofvgocytdn .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ofvgocytdn .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ofvgocytdn .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ofvgocytdn .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ofvgocytdn .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ofvgocytdn .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#ofvgocytdn .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#ofvgocytdn .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ofvgocytdn .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#ofvgocytdn .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#ofvgocytdn .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ofvgocytdn .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ofvgocytdn .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#ofvgocytdn .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#ofvgocytdn .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#ofvgocytdn .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ofvgocytdn .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#ofvgocytdn .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ofvgocytdn .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ofvgocytdn .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ofvgocytdn .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ofvgocytdn .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ofvgocytdn .gt_left {
+  text-align: left;
+}
+
+#ofvgocytdn .gt_center {
+  text-align: center;
+}
+
+#ofvgocytdn .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ofvgocytdn .gt_font_normal {
+  font-weight: normal;
+}
+
+#ofvgocytdn .gt_font_bold {
+  font-weight: bold;
+}
+
+#ofvgocytdn .gt_font_italic {
+  font-style: italic;
+}
+
+#ofvgocytdn .gt_super {
+  font-size: 65%;
+}
+
+#ofvgocytdn .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#ofvgocytdn .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#ofvgocytdn .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#ofvgocytdn .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#ofvgocytdn .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#ofvgocytdn .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#ofvgocytdn .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#ofvgocytdn .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#ofvgocytdn div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_col_headings header">
+<th id="sol" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">sol</th>
+<th id="AT_av" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">AT_av</th>
+<th id="AT_mn" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">AT_mn</th>
+<th id="AT_mx" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">AT_mx</th>
+<th id="PRE_av" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">PRE_av</th>
+<th id="PRE_mn" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">PRE_mn</th>
+<th id="PRE_mx" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">PRE_mx</th>
+<th id="HWS_av" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">HWS_av</th>
+<th id="HWS_mn" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">HWS_mn</th>
+<th id="HWS_mx" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">HWS_mx</th>
+<th id="WD_compass_degrees" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">WD_compass_degrees</th>
+<th id="Season" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Season</th>
+<th id="Month_ordinal" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Month_ordinal</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="sol">675</td>
+<td class="gt_row gt_right" headers="AT_av">-52.39667</td>
+<td class="gt_row gt_right" headers="AT_mn">-71.59556</td>
+<td class="gt_row gt_right" headers="AT_mx">-26.61556</td>
+<td class="gt_row gt_right" headers="PRE_av">750.563</td>
+<td class="gt_row gt_right" headers="PRE_mn">722.0901</td>
+<td class="gt_row gt_right" headers="PRE_mx">768.7910</td>
+<td class="gt_row gt_right" headers="HWS_av">7.233</td>
+<td class="gt_row gt_right" headers="HWS_mn">1.051</td>
+<td class="gt_row gt_right" headers="HWS_mx">22.455</td>
+<td class="gt_row gt_right" headers="WD_compass_degrees">292.5</td>
+<td class="gt_row gt_left" headers="Season">fall</td>
+<td class="gt_row gt_right" headers="Month_ordinal">10</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="sol">676</td>
+<td class="gt_row gt_right" headers="AT_av">-52.67333</td>
+<td class="gt_row gt_right" headers="AT_mn">-71.61778</td>
+<td class="gt_row gt_right" headers="AT_mx">-26.94389</td>
+<td class="gt_row gt_right" headers="PRE_av">749.090</td>
+<td class="gt_row gt_right" headers="PRE_mn">722.4730</td>
+<td class="gt_row gt_right" headers="PRE_mx">767.1426</td>
+<td class="gt_row gt_right" headers="HWS_av">8.526</td>
+<td class="gt_row gt_right" headers="HWS_mn">1.110</td>
+<td class="gt_row gt_right" headers="HWS_mx">26.905</td>
+<td class="gt_row gt_right" headers="WD_compass_degrees">292.5</td>
+<td class="gt_row gt_left" headers="Season">fall</td>
+<td class="gt_row gt_right" headers="Month_ordinal">10</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="sol">677</td>
+<td class="gt_row gt_right" headers="AT_av">-52.80889</td>
+<td class="gt_row gt_right" headers="AT_mn">-71.80500</td>
+<td class="gt_row gt_right" headers="AT_mx">-27.14056</td>
+<td class="gt_row gt_right" headers="PRE_av">748.698</td>
+<td class="gt_row gt_right" headers="PRE_mn">720.5873</td>
+<td class="gt_row gt_right" headers="PRE_mx">767.4249</td>
+<td class="gt_row gt_right" headers="HWS_av">7.887</td>
+<td class="gt_row gt_right" headers="HWS_mn">0.511</td>
+<td class="gt_row gt_right" headers="HWS_mx">23.197</td>
+<td class="gt_row gt_right" headers="WD_compass_degrees">292.5</td>
+<td class="gt_row gt_left" headers="Season">fall</td>
+<td class="gt_row gt_right" headers="Month_ordinal">11</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="sol">678</td>
+<td class="gt_row gt_right" headers="AT_av">-52.53444</td>
+<td class="gt_row gt_right" headers="AT_mn">-72.07111</td>
+<td class="gt_row gt_right" headers="AT_mx">-22.80833</td>
+<td class="gt_row gt_right" headers="PRE_av">743.741</td>
+<td class="gt_row gt_right" headers="PRE_mn">717.7254</td>
+<td class="gt_row gt_right" headers="PRE_mx">760.2834</td>
+<td class="gt_row gt_right" headers="HWS_av">5.246</td>
+<td class="gt_row gt_right" headers="HWS_mn">0.244</td>
+<td class="gt_row gt_right" headers="HWS_mx">18.399</td>
+<td class="gt_row gt_right" headers="WD_compass_degrees">292.5</td>
+<td class="gt_row gt_left" headers="Season">fall</td>
+<td class="gt_row gt_right" headers="Month_ordinal">11</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="sol">679</td>
+<td class="gt_row gt_right" headers="AT_av">-52.52833</td>
+<td class="gt_row gt_right" headers="AT_mn">-71.46889</td>
+<td class="gt_row gt_right" headers="AT_mx">-24.20056</td>
+<td class="gt_row gt_right" headers="PRE_av">744.529</td>
+<td class="gt_row gt_right" headers="PRE_mn">719.4178</td>
+<td class="gt_row gt_right" headers="PRE_mx">763.2724</td>
+<td class="gt_row gt_right" headers="HWS_av">5.565</td>
+<td class="gt_row gt_right" headers="HWS_mn">0.231</td>
+<td class="gt_row gt_right" headers="HWS_mx">19.409</td>
+<td class="gt_row gt_right" headers="WD_compass_degrees">292.5</td>
+<td class="gt_row gt_left" headers="Season">fall</td>
+<td class="gt_row gt_right" headers="Month_ordinal">11</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="sol">680</td>
+<td class="gt_row gt_right" headers="AT_av">-52.10500</td>
+<td class="gt_row gt_right" headers="AT_mn">-71.56167</td>
+<td class="gt_row gt_right" headers="AT_mx">-26.27667</td>
+<td class="gt_row gt_right" headers="PRE_av">743.990</td>
+<td class="gt_row gt_right" headers="PRE_mn">717.1398</td>
+<td class="gt_row gt_right" headers="PRE_mx">764.0093</td>
+<td class="gt_row gt_right" headers="HWS_av">6.517</td>
+<td class="gt_row gt_right" headers="HWS_mn">0.275</td>
+<td class="gt_row gt_right" headers="HWS_mx">24.235</td>
+<td class="gt_row gt_right" headers="WD_compass_degrees">292.5</td>
+<td class="gt_row gt_left" headers="Season">fall</td>
+<td class="gt_row gt_right" headers="Month_ordinal">11</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="sol">681</td>
+<td class="gt_row gt_right" headers="AT_av">-52.46333</td>
+<td class="gt_row gt_right" headers="AT_mn">-70.80389</td>
+<td class="gt_row gt_right" headers="AT_mx">-20.24667</td>
+<td class="gt_row gt_right" headers="PRE_av">743.550</td>
+<td class="gt_row gt_right" headers="PRE_mn">718.4630</td>
+<td class="gt_row gt_right" headers="PRE_mx">760.2244</td>
+<td class="gt_row gt_right" headers="HWS_av">5.632</td>
+<td class="gt_row gt_right" headers="HWS_mn">0.228</td>
+<td class="gt_row gt_right" headers="HWS_mx">18.577</td>
+<td class="gt_row gt_right" headers="WD_compass_degrees">292.5</td>
+<td class="gt_row gt_left" headers="Season">fall</td>
+<td class="gt_row gt_right" headers="Month_ordinal">11</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><br></p>
+</section>
+<section id="visualizations" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="visualizations">Visualizations</h4>
+<p>I made one visualization to show how temperature (max, min and average) changed throughout the days, and another one to picture the wind rose for the most recent sol.</p>
+<div class="cell page-columns page-full">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig <span class="ot">&lt;-</span> mars_data <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.numeric</span>(sol))) <span class="sc">+</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> AT_av), <span class="at">color =</span> <span class="st">"blue4"</span>, <span class="at">size =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> AT_av), <span class="at">color =</span> <span class="st">"blue4"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> AT_mn), <span class="at">color =</span> <span class="st">"blue3"</span>, <span class="at">size =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> AT_mn), <span class="at">color =</span> <span class="st">"blue3"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> AT_mx), <span class="at">color =</span> <span class="st">"blue2"</span>, <span class="at">size =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> AT_mx), <span class="at">color =</span> <span class="st">"blue2"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Sol"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Temperature, C"</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Max, Avg and Min temperature changes throughout the days"</span>) <span class="sc">+</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>()</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(<span class="at">data =</span> fig)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display column-body">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-dc652306da6202b57de6" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-dc652306da6202b57de6">{"x":{"data":[{"x":[675,676,677,678,679,680,681],"y":[-52.396666666666661,-52.673333333333332,-52.808888888888887,-52.534444444444439,-52.528333333333336,-52.104999999999997,-52.463333333333331],"text":["as.numeric(sol): 675<br />AT_av: -52.39667","as.numeric(sol): 676<br />AT_av: -52.67333","as.numeric(sol): 677<br />AT_av: -52.80889","as.numeric(sol): 678<br />AT_av: -52.53444","as.numeric(sol): 679<br />AT_av: -52.52833","as.numeric(sol): 680<br />AT_av: -52.10500","as.numeric(sol): 681<br />AT_av: -52.46333"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,0,139,1)","opacity":1,"size":9.4488188976377963,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,139,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":5.6692913385826778,"color":"rgba(0,0,139,0.4)","dash":"solid"},"frame":null},{"x":[675,676,677,678,679,680,681],"y":[-71.595555555555563,-71.617777777777775,-71.804999999999993,-72.071111111111108,-71.468888888888884,-71.561666666666667,-70.803888888888892],"text":["as.numeric(sol): 675<br />AT_mn: -71.59556","as.numeric(sol): 676<br />AT_mn: -71.61778","as.numeric(sol): 677<br />AT_mn: -71.80500","as.numeric(sol): 678<br />AT_mn: -72.07111","as.numeric(sol): 679<br />AT_mn: -71.46889","as.numeric(sol): 680<br />AT_mn: -71.56167","as.numeric(sol): 681<br />AT_mn: -70.80389"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,0,205,1)","opacity":1,"size":9.4488188976377963,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,205,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":5.6692913385826778,"color":"rgba(0,0,205,0.4)","dash":"solid"},"frame":null},{"x":[675,676,677,678,679,680,681],"y":[-26.615555555555556,-26.943888888888885,-27.140555555555554,-22.808333333333334,-24.200555555555553,-26.276666666666667,-20.246666666666666],"text":["as.numeric(sol): 675<br />AT_mx: -26.61556","as.numeric(sol): 676<br />AT_mx: -26.94389","as.numeric(sol): 677<br />AT_mx: -27.14056","as.numeric(sol): 678<br />AT_mx: -22.80833","as.numeric(sol): 679<br />AT_mx: -24.20056","as.numeric(sol): 680<br />AT_mx: -26.27667","as.numeric(sol): 681<br />AT_mx: -20.24667"],"type":"scatter","mode":"markers+lines","marker":{"autocolorscale":false,"color":"rgba(0,0,238,1)","opacity":1,"size":9.4488188976377963,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,238,1)"}},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","line":{"width":5.6692913385826778,"color":"rgba(0,0,238,0.4)","dash":"solid"},"frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":43.105022831050235},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Max, Avg and Min temperature changes throughout the days","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[674.70000000000005,681.29999999999995],"tickmode":"array","ticktext":["676","678","680"],"tickvals":[676,678,680],"categoryorder":"array","categoryarray":["676","678","680"],"nticks":null,"ticks":"outside","tickcolor":"rgba(179,179,179,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(222,222,222,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"Sol","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-74.662333333333336,-17.655444444444445],"tickmode":"array","ticktext":["-70","-60","-50","-40","-30","-20"],"tickvals":[-70,-60,-50,-40,-30,-20],"categoryorder":"array","categoryarray":["-70","-60","-50","-40","-30","-20"],"nticks":null,"ticks":"outside","tickcolor":"rgba(179,179,179,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(222,222,222,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"Temperature, C","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"rgba(255,255,255,1)","line":{"color":"rgba(179,179,179,1)","width":0,"linetype":"solid"},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"64073358d812":{"x":{},"y":{},"type":"scatter"},"6407dd1a014":{"x":{},"y":{}},"64073d648822":{"x":{},"y":{}},"640713258fab":{"x":{},"y":{}},"64076fb2d5f":{"x":{},"y":{}},"6407545fbb8d":{"x":{},"y":{}}},"cur_data":"64073358d812","visdat":{"64073358d812":["function (y) ","x"],"6407dd1a014":["function (y) ","x"],"64073d648822":["function (y) ","x"],"640713258fab":["function (y) ","x"],"64076fb2d5f":["function (y) ","x"],"6407545fbb8d":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p><br></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>last_sol <span class="ot">&lt;-</span> <span class="fu">names</span>(mars_json)[<span class="dv">7</span>]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>wd_data <span class="ot">&lt;-</span> mars_json[[last_sol]]<span class="sc">$</span>WD</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>wd_data <span class="ot">&lt;-</span> wd_data[<span class="fu">names</span>(wd_data) <span class="sc">!=</span> <span class="st">"most_common"</span>]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>wd_tibble <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(wd_data) <span class="sc">|&gt;</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(compass_point, ct)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(wd_tibble <span class="sc">|&gt;</span> <span class="fu">filter</span>(compass_point <span class="sc">==</span> <span class="st">"E"</span>)) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  wd_tibble <span class="ot">&lt;-</span> wd_tibble <span class="sc">|&gt;</span> </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">compass_point =</span> <span class="st">"E"</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">ct =</span> <span class="dv">0</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>wd_tibble <span class="ot">&lt;-</span> wd_tibble <span class="sc">|&gt;</span> </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">compass_point =</span> <span class="fu">factor</span>(compass_point, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"N"</span>, <span class="st">"NNE"</span>, <span class="st">"NE"</span>, <span class="st">"ENE"</span>, <span class="st">"E"</span>, <span class="st">"ESE"</span>, <span class="st">"SE"</span>, <span class="st">"SSE"</span>, <span class="st">"S"</span>, <span class="st">"SSW"</span>, <span class="st">"SW"</span>, <span class="st">"WSW"</span>, <span class="st">"W"</span>, <span class="st">"WNW"</span>, <span class="st">"NW"</span>, <span class="st">"NNW"</span>)))</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>wd_tibble <span class="sc">|&gt;</span> </span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> compass_point,</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> ct)) <span class="sc">+</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.95</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_polar</span>(<span class="at">start =</span> <span class="sc">-</span>pi<span class="sc">/</span><span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Wind Direction Distribution on the last recorded Sol"</span>,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">""</span>,</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"The number of samples"</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assignment_5_files/figure-html/Wind%20map-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

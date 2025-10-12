@@ -64,7 +64,7 @@ income_inequality_recent <- income_inequality |>
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
 
-world_data <- world %>%
+world_data <- world |>
   left_join(income_inequality_recent, by = c("name" = "country_name"))
 
 fig <- ggplot(world_data) +
