@@ -1,0 +1,118 @@
+---
+title: "Assignment 06: Advanced Imports and Data Manipulations"
+author: "Diana Aldoshyna"
+format: html
+---
+
+<br>
+
+###### For this assignmnet I chose to work with a dataset about **Yellow Taxi Trip Records** from 2019.
+
+```{r}
+#| label: setup
+#| include: false
+#| cache: false
+
+if (!require(pacman)) install.packages("pacman")
+
+pacman::p_load(
+  DBI,
+  duckdb,
+  arrow,
+  dplyr,
+  tidyr,
+  polars,
+  tidypolars,
+  tidyverse,
+  fs,
+  ggplot,
+  gt,
+  plotly
+)
+
+```
+
+
+```{r}
+#| label: just lookig
+#| echo: true
+#| message: false
+#| cache: false
+
+con <- dbConnect(duckdb(), shutdown = TRUE)
+
+nyc <- tbl(con, "read_parquet('/Users/dianaa/Documents/AI28 - 2/R_for_data_stat/nyc-taxi/*/*.parquet', hive_partitioning = true)") |>
+  filter(year(as.Date(dropoff_datetime)) == 2019,
+         year(as.Date(pickup_datetime)) == 2019)
+
+nyc |> head(10) |> gt()
+
+```
+
+<br>
+
+### Visualisation 1
+
+Firstly, I decided to take a look at which hours are the most busy ones:
+
+```{r}
+#| label: Visualisation 1
+#| echo: true
+#| message: false
+#| cache: false
+#| column: body-outset
+
+fig <- nyc |>
+  mutate(hour = hour(pickup_datetime)) |> 
+  group_by(hour) |>
+  summarise(num = n() / 1000) |> 
+
+  ggplot(aes(x = hour, y = num)) +
+  geom_point(color = "blue4", size = 2.5) +
+  geom_line(color = "blue4", alpha = 0.5, linewidth = 1.7) +
+  scale_x_continuous(breaks = 0:23) + 
+  labs(x = "Hour",
+       y = "Total number of the rides (in thousands)",
+       title = "The number of taxi rides per hour") +
+  theme_light()
+
+ggplotly(data = fig)
+
+```
+
+<br>
+
+### Visualisation 2
+
+Secondly, I became interested in the hours people tend to leave the most (or the least) tips:
+
+```{r}
+#| label: Visualisation 2
+#| echo: true
+#| message: false
+#| cache: false
+#| column: body-outset
+
+fig <- nyc |>
+  filter(payment_type == "Credit card") |> # here I chose only the drives paid for by a credit card, because cash tips are not registered in the system and equal 0, consequently influencing the mean tip value
+  mutate(hour = hour(pickup_datetime)) |> 
+  group_by(hour) |>
+  summarise(mean_tip = mean(tip_amount, na.rm = TRUE)) |> 
+
+  ggplot(aes(x = hour, y = mean_tip)) +
+  geom_point(color = "blue4", size = 2.5) +
+  geom_line(color = "blue4", alpha = 0.5, linewidth = 1.7) +
+  scale_x_continuous(breaks = 0:23) +
+  labs(x = "Hour",
+       y = "Mean amount of a tip, $",
+       title = "The mean amount of a tip per hour") +
+  theme_light()
+
+ggplotly(data = fig)
+```
+
+<br>
+
+Curiously, while 4-5 AM are the least popular hours to order a taxi, these are also the hours when people tip the most!
+
+And while there are a lot of orders placed in between 5-7 PM, the tips people leave at this time are just about average.
