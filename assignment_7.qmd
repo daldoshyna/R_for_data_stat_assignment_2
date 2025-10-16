@@ -1,0 +1,120 @@
+---
+title: "Assignment 07: Spatial analysis in R"
+author: Diana Aldoshyna
+format: html
+---
+
+<br>
+
+#### Set up, dowloading the shapefile of Ukrainian oblasts
+
+```{r}
+#| label: setup
+#| include: false
+#| cache: false
+
+if (!require("pacman")) install.packages("pacman")
+
+pacman::p_load(
+  terra,
+  giscoR,
+  sf,
+  tidyverse,
+  elevatr,
+  png,
+  magick,
+  furrr,
+  here,
+  future,
+  rvest,
+  RSelenium,
+  netstat,
+  janitor,
+  extrafont,
+  rnaturalearth,
+  glue,
+  exactextractr,
+  plotly
+)
+
+```
+
+```{r}
+#| label: getting the data for the map
+#| echo: true
+#| message: false
+#| cache: false
+
+oblast_list = c("Avtonomna Respublika Krym", "Cherkaska", "Chernihivska", "Chernivetska", "Dnipropetrovska", "Donetska", "Ivano-Frankivska", "Kharkivska", "Khersonska", "Khmelnytska", "Kirovohradska", "Kyiv", "Kyivska", "Luhanska", "Lvivska", "Mykolaivska", "Odeska", "Poltavska", "Rivnenska", "Sevastopol", "Sumska", "Ternopilska", "Vinnytska", "Volynska", "Zakarpatska", "Zaporizka", "Zhytomyrska")
+
+country_sf <- read_sf("data/geoBoundaries-UKR-ADM1-all/geoBoundaries-UKR-ADM1.shp") |> 
+  arrange(shapeName) |> 
+  mutate(region = oblast_list)
+```
+
+<br>
+
+#### Visualisations
+
+For this assignment I created two visualisations: one showing **energy supply** of each Ukrainian oblast', and another one showing **energy consumption**.
+
+```{r}
+#| label: visualisaton energy supply
+#| echo: true
+#| message: false
+#| cache: false
+#| code-fold: true
+#| column: screen-inset
+
+supply_energy <- read_csv("data/supply_energy.csv") |> 
+  clean_names() |> 
+  arrange(region) |> 
+  select(region, x2020)
+
+supply_energy_map <- country_sf |> 
+  left_join(supply_energy, join_by(region == region)) |> 
+  select(shapeName, region, x2020, everything()) |> 
+  ggplot() +
+  geom_sf(aes(fill = x2020)) +
+  scale_fill_viridis_c(option = "plasma", na.value = "grey90") +
+  theme_minimal() +
+  labs(title = "Amount of electricity release per oblast in 2020",
+       fill = "Electricity release, millions of kilowatt-hour")
+
+ggplotly(data = supply_energy_map)
+
+```
+
+As we can see, the top-three oblasts that produce the most electricity are Zaporizka, Mykolaivska and Rivnenska. 
+
+<br>
+
+```{r}
+#| label: visualisaton energy use
+#| echo: true
+#| message: false
+#| cache: false
+#| code-fold: true
+#| column: screen-inset
+
+consumption_energy <- read_csv("data/consumption_energy.csv") |> 
+  clean_names() |> 
+  select(region, x2020) |> 
+  mutate (x2020 = x2020 / 1000) |> 
+  arrange(region)
+
+consumption_energy_map <- country_sf |> 
+  left_join(consumption_energy, join_by(region == region)) |> 
+  select(shapeName, region, x2020, everything()) |> 
+  ggplot() +
+  geom_sf(aes(fill = x2020)) +
+  scale_fill_viridis_c(option = "plasma", na.value = "grey90") +
+  theme_minimal() +
+  labs(title = "Amount of electricity used per oblast in 2020",
+       fill = "Electricity used, millions of kilowatt-hour")
+
+ggplotly(data = consumption_energy_map)
+
+```
+
+And here we can see that the top-three oblasts that consume the most electricity are Dnipropetrovska, Donetska and Zaporizka.
